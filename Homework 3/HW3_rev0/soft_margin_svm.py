@@ -34,7 +34,18 @@ def svm_train_bgd(X: np.ndarray, y: np.ndarray, num_epochs: int=100, C: float=5.
         # first compute the gradient of W and b, and then update accordingly. #
         # Don't forget to implement this function in a vectorized form.       #
         #######################################################################
-        raise NotImplementedError("TODO: Add your implementation here.")
+        buf = (y * (X @ np.transpose(W) + b))
+        ind = [1 if (buff) < 1 else 0 for buff in buf]
+        ind = np.reshape(ind, (num_data,1))
+  
+        
+        w_grad = W - C * np.sum(ind * y * X, axis = 0)
+        b_grad = -C * np.sum(ind * y, axis = 0) 
+
+        W  = W - eta*w_grad
+        b = b - eta*b_grad
+        
+        # raise NotImplementedError("TODO: Add your implementation here.")
         #######################################################################
         #                            END OF YOUR CODE                         #
         #######################################################################

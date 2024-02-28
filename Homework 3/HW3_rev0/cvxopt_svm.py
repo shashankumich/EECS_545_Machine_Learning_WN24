@@ -130,7 +130,7 @@ def get_qp_params(X, y, C, kernel_params):
     b : ndarray of shape (n_2,)
     """
     P, q, G, h, A, b = None, None, None, None, None, None
-
+    num_samples, num_features = X.shape
     ###################################################################################
     # TODO calculate the values for P, q, G, h, A, and b.
     # Make sure the shapes of these outputs are correct and pass the assertions below.
@@ -140,7 +140,17 @@ def get_qp_params(X, y, C, kernel_params):
     # (e.g. degree, gamma, coef0) for every kernel.
     # Hint: kernel_matrix may be useful here.
     ###################################################################################
-    raise NotImplementedError("TODO: Add your implementation here.")
+    b = np.array(0.0, dtype=np.float64)
+    b = b.reshape((1,))
+    y_reshape = np.reshape(y, (num_samples,1)) # (n_samples,1)
+    A = np.array(y_reshape.T, dtype=np.float64)
+    h = np.hstack((np.zeros(num_samples), np.ones(num_samples) * C))
+    G = np.vstack((-np.eye(num_samples), np.eye(num_samples)))
+    q = -1.0*np.ones((num_samples))
+    K = kernel_matrix(X,X, kernel_params)
+    P = (y_reshape @ y_reshape.T ) * K
+
+    # raise NotImplementedError("TODO: Add your implementation here.")
     ###################################################################################
     #                                END OF YOUR CODE                                 #
     ###################################################################################
@@ -188,11 +198,23 @@ def fit_bias(X, y, alpha, kernel_params):
     #   Instead, we use:
     is_support = alpha > 1e-4
     b = None
+    
     ###################################################################################
     # TODO calculate the bias given X, y, and alpha
     # Hint: kernel_matrix or kernel_dot may be useful here
     ###################################################################################
-    raise NotImplementedError("TODO: Add your implementation here.")
+    # Choosing only from the set of support vectors
+    sv_X = X[is_support]
+    num_samples, num_features = sv_X.shape
+    sv_y = y[is_support]
+    sv_alpha = alpha[is_support]
+    K = kernel_matrix(sv_X, sv_X, kernel_params)
+    b_buff = []
+    for i in range(0,num_samples):
+        b_buff.append(sv_y[i] - np.sum(sv_alpha[i]*sv_y[i]*K[i]))
+    b = np.mean(b_buff)
+
+    # raise NotImplementedError("TODO: Add your implementation here.")
     ###################################################################################
     #                                END OF YOUR CODE                                 #
     ###################################################################################
@@ -243,7 +265,13 @@ def decision_function(X, X_train, y_train, b, alpha, kernel_params):
     # Since this is kernelized, you may not be able to calculate w directly.
     # Hint: kernel_matrix or kernel_dot may be useful here
     ###################################################################################
-    raise NotImplementedError("TODO: Add your implementation here.")
+    sv_X = X_train[is_support]
+    sv_y = y_train[is_support]
+    sv_alpha = alpha[is_support]
+    K = kernel_matrix(X, sv_X, kernel_params)
+    
+    h = np.dot(K, sv_alpha * sv_y) + b
+    # raise NotImplementedError("TODO: Add your implementation here.")
     ###################################################################################
     #                                END OF YOUR CODE                                 #
     ###################################################################################
